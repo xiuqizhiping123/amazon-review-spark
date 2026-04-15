@@ -1,7 +1,7 @@
 import domin.Review
 import io.DatasetLoader
 import org.apache.spark.sql.SparkSession
-import pipeline.{Afinn, SentimentPipeline}
+import pipeline.{Afinn, MLPipeline, SentimentPipeline}
 
 object AmazonReview {
   private val datasetPath = "data/amazon-review/All_Beauty.jsonl"
@@ -27,5 +27,7 @@ object AmazonReview {
 
     scored.show(5)
     scored.groupBy("rating").count().orderBy("rating").show()
+
+    MLPipeline.run(scored)
   }
 }

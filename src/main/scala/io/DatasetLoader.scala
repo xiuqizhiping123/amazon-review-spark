@@ -2,7 +2,7 @@ package io
 
 import java.io.{File, FileOutputStream}
 import java.net.{HttpURLConnection, URL}
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success, Try, Using}
 
 object DatasetLoader {
   def ensureDatasetAvailable(url: String, path: String): Unit = {
@@ -23,27 +23,24 @@ object DatasetLoader {
   }
 
   private def downloadDataset(url: String, savePath: String): Try[Unit] = Try {
-    val dir = new File(savePath).getParentFile
-    if (dir != null && !dir.exists()) dir.mkdirs()
+    Option(new File(savePath).getParentFile).foreach(_.mkdirs())
     val connection = new URL(url).openConnection().asInstanceOf[HttpURLConnection]
     connection.setRequestMethod("GET")
-    val responseCode = connection.getResponseCode
-    if (responseCode != HttpURLConnection.HTTP_OK)
-      throw new RuntimeException(s"Response Code: $responseCode")
-    val inputStream = connection.getInputStream
-    val outputStream = new FileOutputStream(savePath)
+    require(
+      connection.getResponseCode == HttpURLConnection.HTTP_OK,
+      s"Server returned: ${connection.getResponseCode}"
+    )
     try {
-      val buffer = new Array[Byte](8192)
-      var totalRead = 0L
-      var bytesRead = inputStream.read(buffer)
-      while (bytesRead != -1) {
-        outputStream.write(buffer, 0, bytesRead)
-        totalRead += bytesRead
-        bytesRead = inputStream.read(buffer)
-      }
+      Using.Manager { use =>
+        val in = use(connection.getInputStream)
+        val out = use(new FileOutputStream(savePath))
+        Iterator.continually {
+            val data = new Array[Byte](8192)
+            (in.read(data), data)
+          }.takeWhile(_._1 != -1)
+          .foreach { case (read, data) => out.write(data, 0, read) }
+      }.get
     } finally {
-      inputStream.close()
-      outputStream.close()
       connection.disconnect()
     }
   }
