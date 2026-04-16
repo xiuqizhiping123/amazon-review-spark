@@ -4,9 +4,6 @@ import org.apache.spark.sql.SparkSession
 import pipeline.{Afinn, MLPipeline, SentimentPipeline}
 
 object AmazonReview {
-  private val datasetPath = "data/amazon-review/All_Beauty.jsonl"
-  private val datasetUrl = "https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023/resolve/main/raw/review_categories/All_Beauty.jsonl"
-
   def main(args: Array[String]): Unit = {
     implicit val spark: SparkSession = SparkSession.builder
       .appName("Amazon Review Sentiment Analysis")
@@ -15,18 +12,31 @@ object AmazonReview {
 
     import spark.implicits._
 
-    DatasetLoader.ensureDatasetAvailable(datasetUrl, datasetPath)
+    val categories = Seq(
+      "All_Beauty" -> "data/amazon-review/All_Beauty.jsonl",
+      "Gift_Cards" -> "data/amazon-review/Gift_Cards.jsonl",
+    )
 
-    val reviews = spark.read.json(datasetPath)
-      .select("rating", "text", "title")
-      .flatMap(Review.fromRow)
+    val baseUrl = "https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023/resolve/main/raw/review_categories"
 
-    val dict = Afinn.load()
-    val dictBc = spark.sparkContext.broadcast(dict)
-    val scored = reviews.map(r => SentimentPipeline.scoreReview(dictBc.value)(r))
-    scored.show(5)
-    scored.groupBy("rating").count().orderBy("rating").show()
+    val allResults = categories.flatMap { case (name, path) =>
+      println(s"Category: $name")
+      DatasetLoader.ensureDatasetAvailable(s"$baseUrl/$name.jsonl", path)
 
-    MLPipeline.run(scored)
+      val reviews = spark.read.json(path)
+        .select("rating", "text", "title")
+        .flatMap(Review.fromRow)
+
+      val dict = Afinn.load()
+      val dictBc = spark.sparkContext.broadcast(dict)
+      val scored = reviews.map(SentimentPipeline.scoreReview(dictBc.value))
+
+      scored.groupBy("rating").count().orderBy("rating").show()
+      MLPipeline.run(scored, name)
+    }
+
+    allResults.toDS().coalesce(1)
+      .write.option("header", "true")
+      .csv("data/results/metrics")
   }
 }

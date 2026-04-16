@@ -12,7 +12,7 @@ import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 import pipeline.SentimentPipeline.{FeatureMode, Hybrid, LexiconOnly, TfidfOnly}
 
 object MLPipeline {
-  def run(ds: Dataset[ScoredReview])(implicit spark: SparkSession): Unit = {
+  def run(ds: Dataset[ScoredReview], category: String)(implicit spark: SparkSession): Seq[ModelMetrics] = {
     val df = SentimentPipeline.prepareText(ds.toDF())
     val Array(train, test) = df.randomSplit(Array(0.8, 0.2), 42L)
     val trainWeighted = addClassWeights(train)
@@ -29,14 +29,19 @@ object MLPipeline {
     testTfidf.count()
     test.cache()
     test.count()
-    runLogisticRegression(trainWeighted, test, LexiconOnly, "LR [LexiconOnly]").show()
-    runLogisticRegression(trainTfidf, testTfidf, TfidfOnly, "LR [TfidfOnly]").show()
-    runLogisticRegression(trainTfidf, testTfidf, Hybrid, "LR [Hybrid]").show()
-    runNaiveBayes(trainTfidf, testTfidf).show()
+    val results = Seq(
+      runLogisticRegression(trainWeighted, test, LexiconOnly, "LR [LexiconOnly]"),
+      runLogisticRegression(trainTfidf, testTfidf, TfidfOnly, "LR [TfidfOnly]"),
+      runLogisticRegression(trainTfidf, testTfidf, Hybrid, "LR [Hybrid]"),
+      runNaiveBayes(trainTfidf, testTfidf)
+    )
+    val resultsWithCategory = results.map(_.copy(category = category))
+    resultsWithCategory.foreach(_.show())
     trainWeighted.unpersist()
     trainTfidf.unpersist()
     testTfidf.unpersist()
     test.unpersist()
+    resultsWithCategory
   }
 
   private def addClassWeights(df: DataFrame): DataFrame = {
@@ -146,7 +151,7 @@ object MLPipeline {
           .take(10)
         println(s"TF-IDF top 10 non-zero weights: ${topCoeffs.map(_._1).mkString(", ")}")
       case Hybrid =>
-        println(s"Lexicon feature weights (scaled): ${coeffs.take(4).mkString(", ")}")
+        println(s"Lexicon feature weights (scaled): ${coeffs.take(SentimentPipeline.lexiconCols.length).mkString(", ")}")
         val topTfidf = coeffs.drop(4).zipWithIndex
           .filter(_._1 != 0.0)
           .sortBy(x => -math.abs(x._1))
@@ -166,14 +171,17 @@ object MLPipeline {
       .rdd
       .cache()
     val mm = new MulticlassMetrics(predictionAndLabels)
-    println("Confusion Matrix:")
-    println(mm.confusionMatrix)
+    val cm = mm.confusionMatrix
     val metrics = ModelMetrics(
       modelName = modelName,
       accuracy = mm.accuracy,
       f1 = mm.weightedFMeasure,
       weightedPrecision = mm.weightedPrecision,
-      weightedRecall = mm.weightedRecall
+      weightedRecall = mm.weightedRecall,
+      tn = cm(0, 0).toLong,
+      fp = cm(0, 1).toLong,
+      fn = cm(1, 0).toLong,
+      tp = cm(1, 1).toLong
     )
     predictionAndLabels.unpersist()
     metrics
