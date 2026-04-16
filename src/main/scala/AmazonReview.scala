@@ -8,7 +8,7 @@ object AmazonReview {
   private val datasetUrl = "https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023/resolve/main/raw/review_categories/All_Beauty.jsonl"
 
   def main(args: Array[String]): Unit = {
-    val spark = SparkSession.builder
+    implicit val spark: SparkSession = SparkSession.builder
       .appName("Amazon Review Sentiment Analysis")
       .master("local[*]")
       .getOrCreate()
@@ -20,11 +20,11 @@ object AmazonReview {
     val reviews = spark.read.json(datasetPath)
       .select("rating", "text", "title")
       .flatMap(Review.fromRow)
+      .limit(2000)
 
     val dict = Afinn.load()
     val dictBc = spark.sparkContext.broadcast(dict)
-    val scored = reviews.map(SentimentPipeline.scoreReview(dictBc.value))
-
+    val scored = reviews.map(r => SentimentPipeline.scoreReview(dictBc.value)(r))
     scored.show(5)
     scored.groupBy("rating").count().orderBy("rating").show()
 
