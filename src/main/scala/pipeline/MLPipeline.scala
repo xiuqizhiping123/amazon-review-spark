@@ -45,22 +45,18 @@ object MLPipeline {
     val lr = new LogisticRegression()
       .setFeaturesCol("features")
       .setLabelCol("label")
-      .setMaxIter(30)
-      //      .setMaxIter(100)
+      .setMaxIter(100)
       .setWeightCol("classWeight")
     val pipeline = new Pipeline().setStages(buildStages(mode, lr))
     val paramGrid = new ParamGridBuilder()
-      .addGrid(lr.regParam, Array(0.1, 0.01))
-      .addGrid(lr.elasticNetParam, Array(0.0, 1.0))
-      //      .addGrid(lr.regParam, Array(1.0, 0.1, 0.01, 0.001))
-      //      .addGrid(lr.elasticNetParam, Array(0.0, 0.25, 0.5, 0.75, 1.0))
+      .addGrid(lr.regParam, Array(1.0, 0.1, 0.01, 0.001))
+      .addGrid(lr.elasticNetParam, Array(0.0, 0.25, 0.5, 0.75, 1.0))
       .build()
     val cv = new CrossValidator()
       .setEstimator(pipeline)
       .setEvaluator(new MulticlassClassificationEvaluator().setLabelCol("label").setMetricName("f1"))
       .setEstimatorParamMaps(paramGrid)
-      .setNumFolds(2)
-    //      .setNumFolds(3)
+      .setNumFolds(3)
     val cvModel = cv.fit(train)
     val lrModel = cvModel.bestModel
       .asInstanceOf[PipelineModel]
@@ -85,8 +81,7 @@ object MLPipeline {
       .setEstimator(pipeline)
       .setEvaluator(new MulticlassClassificationEvaluator().setLabelCol("label").setMetricName("f1"))
       .setEstimatorParamMaps(paramGrid)
-      .setNumFolds(2)
-    //      .setNumFolds(3)
+      .setNumFolds(3)
     val cvModel = cv.fit(train)
     val bestNb = cvModel.bestModel
       .asInstanceOf[org.apache.spark.ml.PipelineModel]
@@ -138,11 +133,22 @@ object MLPipeline {
       case LexiconOnly =>
         println(s"Lexicon feature weights: ${coeffs.mkString(", ")}")
       case TfidfOnly =>
-        println(s"TF-IDF weight sample (top 10): ${coeffs.take(10).mkString(", ")}")
+        val topCoeffs = coeffs.zipWithIndex
+          .filter(_._1 != 0.0)
+          .sortBy(x => -math.abs(x._1))
+          .take(10)
+        println(s"TF-IDF top 10 non-zero weights: ${topCoeffs.map(_._1).mkString(", ")}")
       case Hybrid =>
         println(s"Lexicon feature weights (scaled): ${coeffs.take(4).mkString(", ")}")
-        println(s"TF-IDF weight sample (next 10):   ${coeffs.slice(4, 14).mkString(", ")}")
+        val topTfidf = coeffs.drop(4).zipWithIndex
+          .filter(_._1 != 0.0)
+          .sortBy(x => -math.abs(x._1))
+          .take(10)
+        println(s"TF-IDF top 10 non-zero weights: ${topTfidf.map(_._1).mkString(", ")}")
     }
+    println(s"Best regParam: ${lrModel.getRegParam}")
+    println(s"Best elasticNetParam: ${lrModel.getElasticNetParam}")
+    println(s"Non-zero coefficients: ${coeffs.count(_ != 0.0)}")
   }
 
   private def evalMetrics(predictions: DataFrame, modelName: String)(implicit spark: SparkSession): ModelMetrics = {

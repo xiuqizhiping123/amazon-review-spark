@@ -20,7 +20,6 @@ object AmazonReview {
     val reviews = spark.read.json(datasetPath)
       .select("rating", "text", "title")
       .flatMap(Review.fromRow)
-      .limit(2000)
 
     val dict = Afinn.load()
     val dictBc = spark.sparkContext.broadcast(dict)
