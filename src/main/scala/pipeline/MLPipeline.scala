@@ -16,19 +16,26 @@ object MLPipeline {
     val df = SentimentPipeline.prepareText(ds.toDF())
     val Array(train, test) = df.randomSplit(Array(0.8, 0.2), 42L)
     val trainWeighted = addClassWeights(train)
+    val tfidfPipeline = new Pipeline()
+      .setStages(SentimentPipeline.buildTfidfStages())
+      .fit(trainWeighted)
+    val trainTfidf = tfidfPipeline.transform(trainWeighted)
+    val testTfidf = tfidfPipeline.transform(test)
     trainWeighted.cache()
-    test.cache()
     trainWeighted.count()
+    trainTfidf.cache()
+    trainTfidf.count()
+    testTfidf.cache()
+    testTfidf.count()
+    test.cache()
     test.count()
-    Seq(
-      LexiconOnly -> "LR [LexiconOnly]",
-      TfidfOnly -> "LR [TfidfOnly]",
-      Hybrid -> "LR [Hybrid]"
-    ).foreach { case (mode, label) =>
-      runLogisticRegression(trainWeighted, test, mode, label).show()
-    }
-    runNaiveBayes(trainWeighted, test).show()
+    runLogisticRegression(trainWeighted, test, LexiconOnly, "LR [LexiconOnly]").show()
+    runLogisticRegression(trainTfidf, testTfidf, TfidfOnly, "LR [TfidfOnly]").show()
+    runLogisticRegression(trainTfidf, testTfidf, Hybrid, "LR [Hybrid]").show()
+    runNaiveBayes(trainTfidf, testTfidf).show()
     trainWeighted.unpersist()
+    trainTfidf.unpersist()
+    testTfidf.unpersist()
     test.unpersist()
   }
 
@@ -108,7 +115,7 @@ object MLPipeline {
         val assembler = new VectorAssembler()
           .setInputCols(SentimentPipeline.featureCols(TfidfOnly))
           .setOutputCol("features")
-        SentimentPipeline.buildTfidfStages() ++ Array(assembler, classifier)
+        Array(assembler, classifier)
 
       case Hybrid =>
         val lexiconAssembler = new VectorAssembler()
@@ -122,7 +129,7 @@ object MLPipeline {
         val hybridAssembler = new VectorAssembler()
           .setInputCols(Array("lexiconScaled", SentimentPipeline.tfidfCol))
           .setOutputCol("features")
-        SentimentPipeline.buildTfidfStages() ++ Array(lexiconAssembler, lexiconScaler, hybridAssembler, classifier)
+        Array(lexiconAssembler, lexiconScaler, hybridAssembler, classifier)
     }
   }
 
@@ -152,26 +159,23 @@ object MLPipeline {
   }
 
   private def evalMetrics(predictions: DataFrame, modelName: String)(implicit spark: SparkSession): ModelMetrics = {
-    val evaluator = new MulticlassClassificationEvaluator().setLabelCol("label")
-    val metrics = ModelMetrics(
-      modelName = modelName,
-      accuracy = evaluator.setMetricName("accuracy").evaluate(predictions),
-      f1 = evaluator.setMetricName("f1").evaluate(predictions),
-      weightedPrecision = evaluator.setMetricName("weightedPrecision").evaluate(predictions),
-      weightedRecall = evaluator.setMetricName("weightedRecall").evaluate(predictions)
-    )
-    printConfusionMatrix(predictions)
-    metrics
-  }
-
-  private def printConfusionMatrix(predictions: DataFrame)(implicit spark: SparkSession): Unit = {
     import spark.implicits._
     val predictionAndLabels = predictions
       .select("prediction", "label")
       .as[(Double, Double)]
       .rdd
-    val metrics = new MulticlassMetrics(predictionAndLabels)
+      .cache()
+    val mm = new MulticlassMetrics(predictionAndLabels)
     println("Confusion Matrix:")
-    println(metrics.confusionMatrix)
+    println(mm.confusionMatrix)
+    val metrics = ModelMetrics(
+      modelName = modelName,
+      accuracy = mm.accuracy,
+      f1 = mm.weightedFMeasure,
+      weightedPrecision = mm.weightedPrecision,
+      weightedRecall = mm.weightedRecall
+    )
+    predictionAndLabels.unpersist()
+    metrics
   }
 }
