@@ -1,10 +1,16 @@
+import glob
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import os
 
-os.makedirs('data/results', exist_ok=True)
-df = pd.read_csv('data/results/metrics.csv')
+csv_files = glob.glob('data/results/metrics/*.csv')
+if len(csv_files) > 1:
+    csv_files.sort(key=os.path.getmtime, reverse=True)
+file_to_load = csv_files[0]
+df = pd.read_csv(file_to_load)
+
+
 def plot_model_comparison(df, category_name, ax):
     category_df = df[df['category'] == category_name]
     metrics_to_plot = ['accuracy', 'f1', 'weightedPrecision', 'weightedRecall']
@@ -19,6 +25,7 @@ def plot_model_comparison(df, category_name, ax):
     ax.set_title(f'Category: {category_name}')
     ax.set_ylabel('Model Name')
     ax.set_xlabel('Metrics')
+
 
 fig, axes = plt.subplots(1, 2, figsize=(16, 6))
 plot_model_comparison(df, 'All_Beauty', axes[0])
