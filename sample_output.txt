@@ -1,111 +1,152 @@
+Category: All_Beauty
 Dataset already exists at data/amazon-review/All_Beauty.jsonl. Skipping download.
-+------+--------------------+--------------+---------+-------------+-------------+-----+
-|rating|                text|sentimentScore|wordCount|positiveCount|negativeCount|label|
-+------+--------------------+--------------+---------+-------------+-------------+-----+
-|   5.0|This spray is rea...|             9|       61|            5|            1|  1.0|
-|   4.0|This product does...|             6|       47|            4|            0|  1.0|
-|   5.0|Smells good, feel...|             6|        4|            2|            0|  1.0|
-|   1.0|      Felt synthetic|             0|        2|            0|            0|  0.0|
-|   5.0|             Love it|             3|        2|            1|            0|  1.0|
-+------+--------------------+--------------+---------+-------------+-------------+-----+
-only showing top 5 rows
-+------+-----+
-|rating|count|
-+------+-----+
-|   1.0|  125|
-|   2.0|  122|
-|   3.0|  214|
-|   4.0|  396|
-|   5.0| 1143|
-+------+-----+
++------+------+
+|rating| count|
++------+------+
+|   1.0|102071|
+|   2.0| 43033|
+|   3.0| 56303|
+|   4.0| 79371|
+|   5.0|420643|
++------+------+
 
-26/04/16 06:10:13 WARN InstanceBuilder: Failed to load implementation from:dev.ludovic.netlib.blas.JNIBLAS
-26/04/16 06:10:13 WARN InstanceBuilder: Failed to load implementation from:dev.ludovic.netlib.blas.VectorBLAS
-=== [LexiconOnly] Best LR Coefficients ===
-Lexicon feature weights: 1.1255578524528471, -0.38870479390821255, 0.0, -0.24960941709442677
-Best regParam: 0.01
-Best elasticNetParam: 1.0
-Non-zero coefficients: 3
-Confusion Matrix:
-43.0  23.0   
-92.0  200.0  
+=== [LexiconOnly] Best LR Model ===
+Lexicon weights: 0.5888425615014264, -0.03595541985696443, 0.031233898556921765, -0.2117998643234587
+regParam: 0.1
+elasticNetParam: 0.25
+Non-zero coefficients: 4 / 4
 
-=== LR [LexiconOnly] ===
-Accuracy:   0.6788
-F1 Score:   0.7124
-Precision:  0.7902
-Recall:     0.6788
-       
-26/04/16 06:10:27 WARN SparkStringUtils: Truncated the string representation of a plan since it was too large. This behavior can be adjusted by setting 'spark.sql.debug.maxToStringFields'.
-=== [TfidfOnly] Best LR Coefficients ===
-TF-IDF weight sample (top 10): 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
-Best regParam: 0.01
-Best elasticNetParam: 1.0
-Non-zero coefficients: 494
-Confusion Matrix:
-44.0  22.0   
-67.0  225.0  
+=== [TfidfOnly] Best LR Model ===
+TF-IDF top 10: 0.4498514470203051, 0.3825747780834389, 0.2857052063166964, 0.23082011739394498, 0.22526369081455397, -0.22357220124553026, 0.2200560783796279, 0.21581834816302947, 0.2135171781570177, -0.19589836464156266
+regParam: 0.1
+elasticNetParam: 0.0
+Non-zero coefficients: 10000 / 10000
+Lexicon weights: 0.3192248337572051, -0.029821816802094107, 0.17607473814811675, -0.13411180490802163
 
-=== LR [TfidfOnly] ===
-Accuracy:   0.7514
-F1 Score:   0.7726
-Precision:  0.8161
-Recall:     0.7514
-       
-=== [Hybrid] Best LR Coefficients ===
-Lexicon feature weights (scaled): 1.2023163646960806, 0.0, 0.0, -0.3242284801744347
-TF-IDF weight sample (next 10):   0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
-Best regParam: 0.01
-Best elasticNetParam: 1.0
-Non-zero coefficients: 481
-Confusion Matrix:
-40.0  26.0   
-49.0  243.0  
+=== [Hybrid] Best LR Model ===
+Lexicon weights: 0.3192248337572051, -0.029821816802094107, 0.17607473814811675, -0.13411180490802163
+TF-IDF top 10:   0.37783342538907105, 0.3049768639651946, 0.2424982219131148, 0.22257949297478347, 0.2160101463169556, 0.20080550149098744, -0.1891998722476311, 0.18465389872067509, 0.1821743792567072, 0.17996250456685803
+regParam: 0.1
+elasticNetParam: 0.0
+Non-zero coefficients: 10004 / 10004
 
-=== LR [Hybrid] ===
-Accuracy:   0.7905
-F1 Score:   0.8018
-Precision:  0.8197
-Recall:     0.7905
-       
-26/04/16 06:11:08 WARN DAGScheduler: Broadcasting large task binary with size 1057.8 KiB
-26/04/16 06:11:08 WARN DAGScheduler: Broadcasting large task binary with size 1057.8 KiB
-26/04/16 06:11:09 WARN DAGScheduler: Broadcasting large task binary with size 1057.8 KiB
-26/04/16 06:11:09 WARN DAGScheduler: Broadcasting large task binary with size 1057.8 KiB
-26/04/16 06:11:10 WARN DAGScheduler: Broadcasting large task binary with size 1057.8 KiB
-26/04/16 06:11:10 WARN DAGScheduler: Broadcasting large task binary with size 1057.8 KiB
-26/04/16 06:11:11 WARN DAGScheduler: Broadcasting large task binary with size 1057.8 KiB
-26/04/16 06:11:12 WARN DAGScheduler: Broadcasting large task binary with size 1057.8 KiB
 === [NaiveBayes] Best smoothing: 2.0 ===
-26/04/16 06:11:12 WARN DAGScheduler: Broadcasting large task binary with size 1043.3 KiB
-26/04/16 06:11:12 WARN DAGScheduler: Broadcasting large task binary with size 1043.3 KiB
-26/04/16 06:11:12 WARN DAGScheduler: Broadcasting large task binary with size 1043.3 KiB
-26/04/16 06:11:12 WARN DAGScheduler: Broadcasting large task binary with size 1043.3 KiB
+=== LR [LexiconOnly] (All_Beauty) ===
+Accuracy:         0.7347
+F1 Score:         0.7442
+Precision:        0.7665
+Recall:           0.7347
+Class 0 Recall:   0.7002
+Class 1 Recall:   0.7484
 Confusion Matrix:
-26/04/16 06:11:13 WARN DAGScheduler: Broadcasting large task binary with size 1030.4 KiB
-33.0  33.0   
-61.0  231.0  
+  TN=27970  FP=11973
+  FN=25216  TP=75018
 
-=== NaiveBayes [TfidfOnly] ===
-Accuracy:   0.7374
-F1 Score:   0.7538
-Precision:  0.7784
-Recall:     0.7374
-       
-=== Class Distribution ===
-+-----+-----+
-|label|count|
-+-----+-----+
-|  0.0|  395|
-|  1.0| 1247|
-+-----+-----+
+=== LR [TfidfOnly] (All_Beauty) ===
+Accuracy:         0.8535
+F1 Score:         0.8571
+Precision:        0.8669
+Recall:           0.8535
+Class 0 Recall:   0.8451
+Class 1 Recall:   0.8568
+Confusion Matrix:
+  TN=33757  FP=6186
+  FN=14356  TP=85878
 
-+-----+------------------+-----+
-|label|       classWeight|count|
-+-----+------------------+-----+
-|  0.0| 2.078481012658228|  395|
-|  1.0|0.6583801122694467| 1247|
-+-----+------------------+-----+
+=== LR [Hybrid] (All_Beauty) ===
+Accuracy:         0.8543
+F1 Score:         0.8580
+Precision:        0.8681
+Recall:           0.8543
+Class 0 Recall:   0.8488
+Class 1 Recall:   0.8565
+Confusion Matrix:
+  TN=33902  FP=6041
+  FN=14387  TP=85847
 
+=== NaiveBayes [TfidfOnly] (All_Beauty) ===
+Accuracy:         0.8359
+F1 Score:         0.8396
+Precision:        0.8478
+Recall:           0.8359
+Class 0 Recall:   0.8010
+Class 1 Recall:   0.8498
+Confusion Matrix:
+  TN=31996  FP=7947
+  FN=15059  TP=85175
 
-Process finished with exit code 0
+Category: Gift_Cards
+Dataset already exists at data/amazon-review/Gift_Cards.jsonl. Skipping download.
++------+------+
+|rating| count|
++------+------+
+|   1.0| 12325|
+|   2.0|  1873|
+|   3.0|  3271|
+|   4.0|  6691|
+|   5.0|128244|
++------+------+
+
+=== [LexiconOnly] Best LR Model ===
+Lexicon weights: 0.10631614203742716, -0.08592310351680885, 0.009932297271141333, -0.08591235468600454
+regParam: 1.0
+elasticNetParam: 0.0
+Non-zero coefficients: 4 / 4
+=== [TfidfOnly] Best LR Model ===
+TF-IDF top 10: 0.5300017615488679, 0.5276813665139033, 0.5145067510909775, 0.4895211608689567, 0.47249046342796736, 0.4587180521052265, 0.45062080005110544, 0.4295077670827269, 0.42712044547478645, 0.4205723335427058
+regParam: 0.1
+elasticNetParam: 0.0
+Non-zero coefficients: 9347 / 10000
+Lexicon weights: 0.28049867237576714, -0.06581217584756507, 0.13126487993060276, -0.11943119792369945
+
+=== [Hybrid] Best LR Model ===
+Lexicon weights: 0.28049867237576714, -0.06581217584756507, 0.13126487993060276, -0.11943119792369945
+TF-IDF top 10:   0.5461617930020387, 0.5452775932801384, 0.5235645261663345, 0.4805230339752283, 0.4616789090570971, 0.418748973950823, 0.4075725095618097, 0.40239525022057776, 0.39658690469605345, 0.3921789201989953
+regParam: 0.1
+elasticNetParam: 0.0
+Non-zero coefficients: 9351 / 10004
+
+=== [NaiveBayes] Best smoothing: 2.0 ===
+=== LR [LexiconOnly] (Gift_Cards) ===
+Accuracy:         0.8728
+F1 Score:         0.8801
+Precision:        0.8903
+Recall:           0.8728
+Class 0 Recall:   0.5902
+Class 1 Recall:   0.9085
+Confusion Matrix:
+  TN=2006  FP=1393
+  FN=2457  TP=24410
+
+=== LR [TfidfOnly] (Gift_Cards) ===
+Accuracy:         0.9204
+F1 Score:         0.9250
+Precision:        0.9333
+Recall:           0.9204
+Class 0 Recall:   0.8032
+Class 1 Recall:   0.9353
+Confusion Matrix:
+  TN=2730  FP=669
+  FN=1739  TP=25128
+
+=== LR [Hybrid] (Gift_Cards) ===
+Accuracy:         0.9210
+F1 Score:         0.9258
+Precision:        0.9349
+Recall:           0.9210
+Class 0 Recall:   0.8176
+Class 1 Recall:   0.9340
+Confusion Matrix:
+  TN=2779  FP=620
+  FN=1772  TP=25095
+
+=== NaiveBayes [TfidfOnly] (Gift_Cards) ===
+Accuracy:         0.8939
+F1 Score:         0.9037
+Precision:        0.9231
+Recall:           0.8939
+Class 0 Recall:   0.8126
+Class 1 Recall:   0.9042
+Confusion Matrix:
+  TN=2762  FP=637
+  FN=2574  TP=24293
