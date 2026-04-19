@@ -1,0 +1,111 @@
+Dataset already exists at data/amazon-review/All_Beauty.jsonl. Skipping download.
++------+--------------------+--------------+---------+-------------+-------------+-----+
+|rating|                text|sentimentScore|wordCount|positiveCount|negativeCount|label|
++------+--------------------+--------------+---------+-------------+-------------+-----+
+|   5.0|This spray is rea...|             9|       61|            5|            1|  1.0|
+|   4.0|This product does...|             6|       47|            4|            0|  1.0|
+|   5.0|Smells good, feel...|             6|        4|            2|            0|  1.0|
+|   1.0|      Felt synthetic|             0|        2|            0|            0|  0.0|
+|   5.0|             Love it|             3|        2|            1|            0|  1.0|
++------+--------------------+--------------+---------+-------------+-------------+-----+
+only showing top 5 rows
++------+-----+
+|rating|count|
++------+-----+
+|   1.0|  125|
+|   2.0|  122|
+|   3.0|  214|
+|   4.0|  396|
+|   5.0| 1143|
++------+-----+
+
+26/04/16 06:10:13 WARN InstanceBuilder: Failed to load implementation from:dev.ludovic.netlib.blas.JNIBLAS
+26/04/16 06:10:13 WARN InstanceBuilder: Failed to load implementation from:dev.ludovic.netlib.blas.VectorBLAS
+=== [LexiconOnly] Best LR Coefficients ===
+Lexicon feature weights: 1.1255578524528471, -0.38870479390821255, 0.0, -0.24960941709442677
+Best regParam: 0.01
+Best elasticNetParam: 1.0
+Non-zero coefficients: 3
+Confusion Matrix:
+43.0  23.0   
+92.0  200.0  
+
+=== LR [LexiconOnly] ===
+Accuracy:   0.6788
+F1 Score:   0.7124
+Precision:  0.7902
+Recall:     0.6788
+       
+26/04/16 06:10:27 WARN SparkStringUtils: Truncated the string representation of a plan since it was too large. This behavior can be adjusted by setting 'spark.sql.debug.maxToStringFields'.
+=== [TfidfOnly] Best LR Coefficients ===
+TF-IDF weight sample (top 10): 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+Best regParam: 0.01
+Best elasticNetParam: 1.0
+Non-zero coefficients: 494
+Confusion Matrix:
+44.0  22.0   
+67.0  225.0  
+
+=== LR [TfidfOnly] ===
+Accuracy:   0.7514
+F1 Score:   0.7726
+Precision:  0.8161
+Recall:     0.7514
+       
+=== [Hybrid] Best LR Coefficients ===
+Lexicon feature weights (scaled): 1.2023163646960806, 0.0, 0.0, -0.3242284801744347
+TF-IDF weight sample (next 10):   0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+Best regParam: 0.01
+Best elasticNetParam: 1.0
+Non-zero coefficients: 481
+Confusion Matrix:
+40.0  26.0   
+49.0  243.0  
+
+=== LR [Hybrid] ===
+Accuracy:   0.7905
+F1 Score:   0.8018
+Precision:  0.8197
+Recall:     0.7905
+       
+26/04/16 06:11:08 WARN DAGScheduler: Broadcasting large task binary with size 1057.8 KiB
+26/04/16 06:11:08 WARN DAGScheduler: Broadcasting large task binary with size 1057.8 KiB
+26/04/16 06:11:09 WARN DAGScheduler: Broadcasting large task binary with size 1057.8 KiB
+26/04/16 06:11:09 WARN DAGScheduler: Broadcasting large task binary with size 1057.8 KiB
+26/04/16 06:11:10 WARN DAGScheduler: Broadcasting large task binary with size 1057.8 KiB
+26/04/16 06:11:10 WARN DAGScheduler: Broadcasting large task binary with size 1057.8 KiB
+26/04/16 06:11:11 WARN DAGScheduler: Broadcasting large task binary with size 1057.8 KiB
+26/04/16 06:11:12 WARN DAGScheduler: Broadcasting large task binary with size 1057.8 KiB
+=== [NaiveBayes] Best smoothing: 2.0 ===
+26/04/16 06:11:12 WARN DAGScheduler: Broadcasting large task binary with size 1043.3 KiB
+26/04/16 06:11:12 WARN DAGScheduler: Broadcasting large task binary with size 1043.3 KiB
+26/04/16 06:11:12 WARN DAGScheduler: Broadcasting large task binary with size 1043.3 KiB
+26/04/16 06:11:12 WARN DAGScheduler: Broadcasting large task binary with size 1043.3 KiB
+Confusion Matrix:
+26/04/16 06:11:13 WARN DAGScheduler: Broadcasting large task binary with size 1030.4 KiB
+33.0  33.0   
+61.0  231.0  
+
+=== NaiveBayes [TfidfOnly] ===
+Accuracy:   0.7374
+F1 Score:   0.7538
+Precision:  0.7784
+Recall:     0.7374
+       
+=== Class Distribution ===
++-----+-----+
+|label|count|
++-----+-----+
+|  0.0|  395|
+|  1.0| 1247|
++-----+-----+
+
++-----+------------------+-----+
+|label|       classWeight|count|
++-----+------------------+-----+
+|  0.0| 2.078481012658228|  395|
+|  1.0|0.6583801122694467| 1247|
++-----+------------------+-----+
+
+
+Process finished with exit code 0
