@@ -147,22 +147,23 @@ object MLPipeline {
    * */
   private def printCoefficients(lrModel: LogisticRegressionModel, mode: FeatureMode): Unit = {
     val coeffs = lrModel.coefficients.toArray
-    val featureInfo: Unit = mode match {
+    val featureInfo: String = mode match {
       case LexiconOnly =>
-        println(s"Lexicon weights: ${coeffs.mkString(", ")}")
+        s"Lexicon weights: ${coeffs.mkString(", ")}"
       case TfidfOnly =>
         val top = coeffs.zipWithIndex
           .filter(_._1 != 0.0)
           .sortBy(x => -math.abs(x._1))
           .take(10)
-        println(s"TF-IDF top 10: ${top.map(_._1).mkString(", ")}")
+        s"TF-IDF top 10: ${top.map(_._1).mkString(", ")}"
       case Hybrid =>
         println(s"Lexicon weights: ${coeffs.take(SentimentPipeline.lexiconCols.length).mkString(", ")}")
         val top = coeffs.drop(SentimentPipeline.lexiconCols.length).zipWithIndex
           .filter(_._1 != 0.0)
           .sortBy(x => -math.abs(x._1))
           .take(10)
-        println(s"TF-IDF top 10: ${top.map(_._1).mkString(", ")}")
+        s"Lexicon weights: ${coeffs.take(SentimentPipeline.lexiconCols.length).mkString(", ")}\n" +
+          s"TF-IDF top 10:   ${top.map(_._1).mkString(", ")}"
     }
     println(s"=== [$mode] Best LR Model ===")
     println(featureInfo)
