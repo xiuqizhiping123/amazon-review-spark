@@ -138,29 +138,37 @@ object MLPipeline {
     }
   }
 
+  /**
+   * Prints diagnostic information about the best LR model's learned coefficients.
+   * LexiconOnly: prints all four lexicon feature weights directly.
+   * TfidfOnly: extracts the top 10 non-zero weights by absolute value from the 10,000-dimensional TF-IDF vector, since
+   * sequential indexing would likely return all zeros due to L1 sparsity.
+   * Hybrid: prints the four lexicon weights first, then the top 10 non-zero TF-IDF weights from the remaining dimensions.
+   * */
   private def printCoefficients(lrModel: LogisticRegressionModel, mode: FeatureMode): Unit = {
     val coeffs = lrModel.coefficients.toArray
-    println(s"=== [$mode] Best LR Coefficients ===")
-    mode match {
+    val featureInfo: Unit = mode match {
       case LexiconOnly =>
-        println(s"Lexicon feature weights: ${coeffs.mkString(", ")}")
+        println(s"Lexicon weights: ${coeffs.mkString(", ")}")
       case TfidfOnly =>
-        val topCoeffs = coeffs.zipWithIndex
+        val top = coeffs.zipWithIndex
           .filter(_._1 != 0.0)
           .sortBy(x => -math.abs(x._1))
           .take(10)
-        println(s"TF-IDF top 10 non-zero weights: ${topCoeffs.map(_._1).mkString(", ")}")
+        println(s"TF-IDF top 10: ${top.map(_._1).mkString(", ")}")
       case Hybrid =>
-        println(s"Lexicon feature weights (scaled): ${coeffs.take(SentimentPipeline.lexiconCols.length).mkString(", ")}")
-        val topTfidf = coeffs.drop(4).zipWithIndex
+        println(s"Lexicon weights: ${coeffs.take(SentimentPipeline.lexiconCols.length).mkString(", ")}")
+        val top = coeffs.drop(SentimentPipeline.lexiconCols.length).zipWithIndex
           .filter(_._1 != 0.0)
           .sortBy(x => -math.abs(x._1))
           .take(10)
-        println(s"TF-IDF top 10 non-zero weights: ${topTfidf.map(_._1).mkString(", ")}")
+        println(s"TF-IDF top 10: ${top.map(_._1).mkString(", ")}")
     }
-    println(s"Best regParam: ${lrModel.getRegParam}")
-    println(s"Best elasticNetParam: ${lrModel.getElasticNetParam}")
-    println(s"Non-zero coefficients: ${coeffs.count(_ != 0.0)}")
+    println(s"=== [$mode] Best LR Model ===")
+    println(featureInfo)
+    println(s"regParam: ${lrModel.getRegParam}")
+    println(s"elasticNetParam: ${lrModel.getElasticNetParam}")
+    println(s"Non-zero coefficients: ${coeffs.count(_ != 0.0)} / ${coeffs.length}")
   }
 
   private def evalMetrics(predictions: DataFrame, modelName: String)(implicit spark: SparkSession): ModelMetrics = {
