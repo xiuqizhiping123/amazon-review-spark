@@ -35,8 +35,11 @@ object AmazonReview {
       MLPipeline.run(scored, name)
     }
 
+    // Export as a single partitioned CSV
     allResults.toDS().coalesce(1)
-      .write.option("header", "true")
+      .write
+      .mode("overwrite")
+      .option("header", "true")
       .csv("data/results/metrics")
   }
 }

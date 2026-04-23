@@ -7,5 +7,7 @@ lazy val root = (project in file("."))
     name := "untitled",
     libraryDependencies += "org.apache.spark" %% "spark-sql" % "4.1.1",
     libraryDependencies += "org.apache.spark" %% "spark-mllib" % "4.1.1",
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test,
+    javacOptions ++= Seq("--release", "17"),
+    scalacOptions ++= Seq("-release", "17")
   )
